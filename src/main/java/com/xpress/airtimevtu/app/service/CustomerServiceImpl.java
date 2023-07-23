@@ -10,7 +10,6 @@ import com.xpress.airtimevtu.app.model.Customer;
 import com.xpress.airtimevtu.app.model.UniqueCode;
 import com.xpress.airtimevtu.app.repository.CustomerRepository;
 import com.xpress.airtimevtu.exception.CustomerRegistrationException;
-import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Value;
@@ -18,8 +17,6 @@ import org.springframework.http.*;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
-
-import java.util.UUID;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
@@ -32,9 +29,9 @@ public class CustomerServiceImpl implements CustomerService{
     private final RestTemplate restTemplate;
     private final ModelMapper modelMapper;
 
-    @Value("${PUBLIC_KEY}")
+    @Value("${PUBLIC_LIVE_KEY}")
     private String publicKey;
-    @Value("${PRIVATE_KEY}")
+    @Value("${PRIVATE_TEST_KEY}")
     private String privateKey;
 
     @Override
@@ -53,19 +50,23 @@ public class CustomerServiceImpl implements CustomerService{
 
     @Override
     public AirtimeResponseDto purchaseAirtime(AirtimeRequestDto airtimeRequestDto) {
-        String requestId = UUID.randomUUID().toString();
+        String requestId = "12345";//UUID.randomUUID().toString();
         UniqueCode uniqueCode = UniqueCode.getUniqueCodeByBiller(airtimeRequestDto.getBiller());
 
         XpressRequestEntity requestBody = new XpressRequestEntity();
         requestBody.setDetail(new Detail(airtimeRequestDto.getPhoneNumber(), airtimeRequestDto.getAmount()));
         requestBody.setRequestId(requestId);
         requestBody.setUniqueCode(uniqueCode.name());
+        if (uniqueCode == UniqueCode.MOBILE_69358) {
+            String mobile9UniqueCode = String.format("9%s", uniqueCode.name());
+            requestBody.setUniqueCode(mobile9UniqueCode);
+        }
 
         String url = "https://billerstest.xpresspayments.com:9603/api/v1/airtime/fulfil";
 
         HttpHeaders headers = new HttpHeaders();
         headers.set(HttpHeaders.AUTHORIZATION, "Bearer " + publicKey);
-        headers.set("PaymentHash", privateKey);
+        headers.set("PaymentHash", "1a795044f24b435129ce7ee429630500f8ab979a6e2a2bf07ca04a3f8b469ec14f29f8e739132886490762415283471aeb2fcd57eaa1eed4daa7609e76a78d6a");
         headers.set("Channel", "https://billerstest.xpresspayments.com:9603/api/v1/airtime/fulfil");
         headers.set(HttpHeaders.CONTENT_TYPE, APPLICATION_JSON_VALUE);
 

@@ -5,7 +5,7 @@ import com.xpress.airtimevtu.exception.AirtimeException;
 import java.util.Arrays;
 
 public enum UniqueCode {
-    MTN_24207("MTN");
+    MTN_24207("MTN"), GLO_30387("GLO"), AIRTEL_22689("AIRTEL"), MOBILE_69358("9MOBILE");
 
     private final String biller;
 
